@@ -1,11 +1,10 @@
-<!-- templates/admin_login.html - Admin Login Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - NTT Data Service Desk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -16,113 +15,165 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #004d40 0%, #1a2a3a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="100" cy="100" r="80" fill="rgba(255,255,255,0.03)"/><circle cx="800" cy="200" r="120" fill="rgba(255,255,255,0.03)"/><circle cx="500" cy="800" r="150" fill="rgba(255,255,255,0.03)"/></svg>');
+            pointer-events: none;
         }
 
         .login-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
             overflow: hidden;
+            animation: fadeInUp 0.6s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .login-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
             color: white;
-            padding: 25px 30px;
+            padding: 32px;
             text-align: center;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #004d40;
+            margin: 0 auto 16px;
         }
 
         .login-header h2 {
             font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
         .login-header p {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
         }
 
         .login-body {
-            padding: 30px;
+            padding: 32px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-            font-size: 14px;
+            font-weight: 600;
+            color: #1a2a3a;
+            font-size: 13px;
+            letter-spacing: 0.3px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             transition: all 0.3s;
+            background: #f9fafb;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            border-color: #00695c;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0,105,92,0.1);
         }
 
         .btn-login {
             width: 100%;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #004d40 0%, #00695c 100%);
             color: white;
         }
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+            box-shadow: 0 10px 25px -5px rgba(0,77,64,0.4);
         }
 
-        /* Flash Messages */
         .flash-message {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: slideDown 0.3s ease;
+            gap: 12px;
+            animation: slideDown 0.4s ease;
         }
 
         .flash-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
         }
 
         .flash-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #00695c;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .back-link a:hover {
+            color: #004d40;
+            gap: 10px;
         }
 
         @keyframes slideDown {
@@ -136,28 +187,38 @@
             }
         }
 
-        .back-link {
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .demo-creds {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 20px;
             text-align: center;
-            margin-top: 15px;
+            font-size: 12px;
+            color: #6b7280;
         }
 
-        .back-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .back-link a:hover {
-            text-decoration: underline;
+        .demo-creds strong {
+            color: #004d40;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
+            <img src="/static/image.png" alt="Logo" style="height: 56px; width: auto;">
             <h2><i class="fas fa-lock"></i> Admin Login</h2>
-            <p>Enter your credentials to access the admin panel</p>
+            <p>Secure access to service desk management</p>
         </div>
         <div class="login-body">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -184,6 +245,10 @@
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
+
+            <div class="demo-creds">
+                <!-- <strong>Demo Credentials:</strong> admin / admin123 -->
+            </div>
 
             <div class="back-link">
                 <a href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Back to Ticket Submission</a>

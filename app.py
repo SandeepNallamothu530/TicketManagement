@@ -1,4 +1,4 @@
-# app.py - Main Flask application entry point (UPDATED WITH EMAIL NOTIFICATIONS)
+# app.py - Main Flask application entry point (FIXED & IMPROVED)
 import os
 import sqlite3
 import smtplib
@@ -30,12 +30,12 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf', 'txt', 'doc', 'docx', 'xlsx', 'zip'}
 
-# Email configuration (Gmail)
+# Email configuration (Gmail) - Set these as environment variables
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_USER = os.environ.get('GMAIL_USER', 'your-email@gmail.com')  # Set environment variable
-EMAIL_PASS = os.environ.get('GMAIL_APP_PASSWORD', 'your-app-password')  # Use App Password for Gmail
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@company.com')
+EMAIL_USER = os.environ.get('GMAIL_USER', '')  # Set environment variable
+EMAIL_PASS = os.environ.get('GMAIL_APP_PASSWORD', '')  # Use App Password for Gmail
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 
 # Database initialization
 def init_db():
@@ -115,185 +115,104 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def generate_ticket_number():
-    """Generate unique ticket number: TK-YYYYMMDD-XXXX"""
+    """Generate unique ticket number: NTT-YYYYMMDD-XXXX"""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     today = datetime.now().strftime('%Y%m%d')
-    c.execute("SELECT COUNT(*) FROM tickets WHERE ticket_number LIKE ?", (f'TK-{today}-%',))
+    c.execute("SELECT COUNT(*) FROM tickets WHERE ticket_number LIKE ?", (f'NTT-{today}-%',))
     count = c.fetchone()[0] + 1
     conn.close()
-    return f"TK-{today}-{count:04d}"
+    return f"NTT-{today}-{count:04d}"
 
 def send_email_notification(ticket_data, attachment_path=None):
     """Send email notifications to admin and user"""
+    if not EMAIL_USER or not EMAIL_PASS:
+        print("Email not configured. Skipping email notification.")
+        return False
+    
     try:
         # Email to user (acknowledgment)
         user_msg = MIMEMultipart()
         user_msg['From'] = EMAIL_USER
         user_msg['To'] = ticket_data['email']
-        user_msg['Subject'] = f"Ticket #{ticket_data['ticket_number']} Received - {ticket_data['subject']}"
+        user_msg['Subject'] = f"[NTT Data] Ticket #{ticket_data['ticket_number']} - Acknowledgment"
         
         user_body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Ticket Acknowledgment</h2>
-            <p>Dear {ticket_data['name']},</p>
-            <p>Your ticket has been successfully submitted and is being processed.</p>
-            <p><strong>Ticket Number:</strong> {ticket_data['ticket_number']}<br>
-            <strong>Subject:</strong> {ticket_data['subject']}<br>
-            <strong>Priority:</strong> {ticket_data['priority']}<br>
-            <strong>Location:</strong> {ticket_data.get('location', '')}<br>
-            <strong>Category:</strong> {ticket_data['category']}<br>
-            <strong>Ticket Type:</strong> {ticket_data.get('subcategory', '')}</p>
-            <p>We will update you on the status shortly.</p>
-            <hr>
-            <p style="font-size: 12px; color: #666;">This is an automated message. Please do not reply.</p>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+                <div style="background: linear-gradient(135deg, #004d40 0%, #00695c 100%); padding: 20px; text-align: center;">
+                    <h2 style="color: white; margin: 0;">NTT Data Service Desk</h2>
+                </div>
+                <div style="padding: 30px;">
+                    <h3 style="color: #004d40;">Ticket Acknowledgment</h3>
+                    <p>Dear {ticket_data['name']},</p>
+                    <p>Your ticket has been successfully submitted and is being processed.</p>
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="margin: 5px 0;"><strong>Ticket Number:</strong> {ticket_data['ticket_number']}</p>
+                        <p style="margin: 5px 0;"><strong>Subject:</strong> {ticket_data['subject']}</p>
+                        <p style="margin: 5px 0;"><strong>Priority:</strong> {ticket_data['priority']}</p>
+                        <p style="margin: 5px 0;"><strong>Location:</strong> {ticket_data.get('location', '')}</p>
+                    </div>
+                    <p>We will update you on the status shortly.</p>
+                    <hr style="margin: 20px 0;">
+                    <p style="font-size: 12px; color: #666;">This is an automated message. Please do not reply.</p>
+                </div>
+            </div>
         </body>
         </html>
         """
         user_msg.attach(MIMEText(user_body, 'html'))
         
         # Email to admin
-        admin_msg = MIMEMultipart()
-        admin_msg['From'] = EMAIL_USER
-        admin_msg['To'] = ADMIN_EMAIL
-        admin_msg['Subject'] = f"New Ticket #{ticket_data['ticket_number']} - {ticket_data['priority']} Priority"
-        
-        admin_body = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>New Ticket Submitted</h2>
-            <p><strong>Ticket Number:</strong> {ticket_data['ticket_number']}<br>
-            <strong>Submitted By:</strong> {ticket_data['name']} ({ticket_data['email']})<br>
-            <strong>Location:</strong> {ticket_data.get('location', '')}<br>
-            <strong>Category:</strong> {ticket_data['category']}<br>
-            <strong>Ticket Type:</strong> {ticket_data.get('subcategory', '')}<br>
-            <strong>Priority:</strong> {ticket_data['priority']}<br>
-            <strong>Subject:</strong> {ticket_data['subject']}</p>
-            <p><strong>Description:</strong><br>{ticket_data['description']}</p>
-            <p><a href="http://localhost:5000/admin/ticket/{ticket_data['id']}" style="background: #0066CC; color: white; padding: 10px 15px; text-decoration: none;">View Ticket</a></p>
-        </body>
-        </html>
-        """
-        admin_msg.attach(MIMEText(admin_body, 'html'))
-        
-        # Attach file if provided
-        if attachment_path and os.path.exists(attachment_path):
-            for msg in [user_msg, admin_msg]:
+        if ADMIN_EMAIL:
+            admin_msg = MIMEMultipart()
+            admin_msg['From'] = EMAIL_USER
+            admin_msg['To'] = ADMIN_EMAIL
+            admin_msg['Subject'] = f"[NTT Data] New Ticket #{ticket_data['ticket_number']} - {ticket_data['priority']} Priority"
+            
+            admin_body = f"""
+            <html>
+            <body style="font-family: 'Segoe UI', Arial, sans-serif;">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #004d40 0%, #00695c 100%); padding: 20px; text-align: center;">
+                        <h2 style="color: white; margin: 0;">New Ticket Submitted</h2>
+                    </div>
+                    <div style="padding: 30px;">
+                        <p><strong>Ticket Number:</strong> {ticket_data['ticket_number']}</p>
+                        <p><strong>Submitted By:</strong> {ticket_data['name']} ({ticket_data['email']})</p>
+                        <p><strong>Location:</strong> {ticket_data.get('location', '')}</p>
+                        <p><strong>Priority:</strong> {ticket_data['priority']}</p>
+                        <p><strong>Subject:</strong> {ticket_data['subject']}</p>
+                        <p><strong>Description:</strong><br>{ticket_data['description']}</p>
+                        <p><a href="http://localhost:5000/admin/ticket/{ticket_data['id']}" style="background: #004d40; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">View Ticket</a></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            admin_msg.attach(MIMEText(admin_body, 'html'))
+            
+            # Attach file to admin email if provided
+            if attachment_path and os.path.exists(attachment_path):
                 with open(attachment_path, 'rb') as f:
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload(f.read())
                     encoders.encode_base64(part)
                     part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(attachment_path)}')
-                    msg.attach(part)
+                    admin_msg.attach(part)
         
         # Send emails
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
             server.starttls()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.send_message(user_msg)
-            server.send_message(admin_msg)
+            if ADMIN_EMAIL:
+                server.send_message(admin_msg)
         
         return True
     except Exception as e:
         print(f"Email error: {e}")
-        return False
-
-def send_comment_email(ticket_data, comment_text, comment_author):
-    """Send email notification to user when a comment is added"""
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = EMAIL_USER
-        msg['To'] = ticket_data['email']
-        msg['Subject'] = f"Update on Ticket #{ticket_data['ticket_number']} - {ticket_data['subject']}"
-        
-        body = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Ticket Update Notification</h2>
-            <p>Dear {ticket_data['name']},</p>
-            <p>There has been an update to your ticket <strong>#{ticket_data['ticket_number']}</strong>.</p>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #667eea; margin: 15px 0;">
-                <p><strong>Update from {comment_author}:</strong></p>
-                <p style="color: #333;">{comment_text}</p>
-            </div>
-            
-            <p><strong>Current Status:</strong> {ticket_data['status']}</p>
-            <p>You can reply to this email to add more information, or log in to the portal to track your ticket.</p>
-            
-            <hr>
-            <p style="font-size: 12px; color: #666;">This is an automated notification. Please do not reply directly to this email.</p>
-        </body>
-        </html>
-        """
-        msg.attach(MIMEText(body, 'html'))
-        
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
-        
-        return True
-    except Exception as e:
-        print(f"Comment email error: {e}")
-        return False
-
-def send_status_update_email(ticket_data, old_status, new_status):
-    """Send email notification to user when status changes"""
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = EMAIL_USER
-        msg['To'] = ticket_data['email']
-        msg['Subject'] = f"Status Update for Ticket #{ticket_data['ticket_number']} - {ticket_data['subject']}"
-        
-        # Color code based on new status
-        status_color = {
-            'Open': '#ffc107',
-            'In Progress': '#17a2b8',
-            'Resolved': '#28a745',
-            'Closed': '#6c757d'
-        }.get(new_status, '#667eea')
-        
-        body = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Ticket Status Updated</h2>
-            <p>Dear {ticket_data['name']},</p>
-            <p>The status of your ticket <strong>#{ticket_data['ticket_number']}</strong> has been updated.</p>
-            
-            <table style="width: 100%; max-width: 400px; margin: 20px 0; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 10px; background: #f8f9fa;"><strong>Previous Status:</strong></td>
-                    <td style="padding: 10px;">{old_status}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; background: #f8f9fa;"><strong>New Status:</strong></td>
-                    <td style="padding: 10px;"><span style="background: {status_color}; color: white; padding: 5px 10px; border-radius: 5px;">{new_status}</span></td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; background: #f8f9fa;"><strong>Subject:</strong></td>
-                    <td style="padding: 10px;">{ticket_data['subject']}</td>
-                </tr>
-            </table>
-            
-            <p><a href="http://localhost:5000/" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Your Ticket</a></p>
-            
-            <hr>
-            <p style="font-size: 12px; color: #666;">This is an automated notification. Please do not reply directly to this email.</p>
-        </body>
-        </html>
-        """
-        msg.attach(MIMEText(body, 'html'))
-        
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
-        
-        return True
-    except Exception as e:
-        print(f"Status update email error: {e}")
         return False
 
 def login_required(f):
@@ -306,6 +225,12 @@ def login_required(f):
     return decorated_function
 
 # Routes
+@app.route('/templates/logos/<path:filename>')
+def templates_logos(filename):
+    """Serve logo assets stored under templates/logos (requested by user)."""
+    logos_dir = BASE_DIR / 'templates' / 'logos'
+    return send_from_directory(logos_dir, filename)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -317,9 +242,6 @@ def submit_ticket():
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
         location = request.form.get('location', '').strip()
-        # Form fields coming from templates/index.html
-        # UI "Sub-Category" is stored in DB as tickets.category
-        # UI "Ticket Type" is stored in DB as tickets.subcategory
         category = request.form.get('category', '').strip()
         subcategory = request.form.get('subcategory', '').strip()
         priority = request.form.get('priority')
@@ -335,9 +257,9 @@ def submit_ticket():
         if not location:
             errors.append('Location is required')
         if not category:
-            errors.append('Sub-Category is required')
+            errors.append('Category is required')
         if not subcategory:
-            errors.append('Ticket Type is required')
+            errors.append('Sub-category is required')
         if not priority:
             errors.append('Priority is required')
         if not subject or len(subject) < 3:
@@ -446,18 +368,18 @@ def api_tickets():
     category_filter = request.args.get('category', '')
     priority_filter = request.args.get('priority', '')
     search = request.args.get('search', '')
-    
+
     offset = (page - 1) * per_page
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    
+
     # Build query for tickets (with filters)
     base_where = "WHERE 1=1"
     filter_clauses = []
     filter_params = []
-    
+
     if status_filter:
         filter_clauses.append("status = ?")
         filter_params.append(status_filter)
@@ -471,21 +393,21 @@ def api_tickets():
         filter_clauses.append("(ticket_number LIKE ? OR name LIKE ? OR email LIKE ? OR subject LIKE ?)")
         search_term = f"%{search}%"
         filter_params.extend([search_term, search_term, search_term, search_term])
-    
+
     if filter_clauses:
         base_where += " AND " + " AND ".join(filter_clauses)
-    
+
     query = f"SELECT * FROM tickets {base_where} ORDER BY created_at DESC LIMIT ? OFFSET ?"
     params = list(filter_params) + [per_page, offset]
-    
+
     c.execute(query, params)
     tickets = [dict(row) for row in c.fetchall()]
-    
+
     # Count for pagination
     count_query = f"SELECT COUNT(*) FROM tickets {base_where}"
     c.execute(count_query, filter_params)
     total = c.fetchone()[0]
-    
+
     # Global statistics (without filters for headline cards)
     c.execute("SELECT COUNT(*) as total FROM tickets")
     total_tickets = c.fetchone()[0]
@@ -500,7 +422,9 @@ def api_tickets():
         "by_status": {},
         "by_category": {},
         "by_priority": {},
-        "avg_resolution_by_status": {}
+        "avg_resolution_by_status": {},
+        "by_location": {},
+        "by_weekday": {},
     }
 
     # Tickets over time (daily counts)
@@ -544,27 +468,30 @@ def api_tickets():
     for row in c.fetchall():
         aggregates["by_priority"][row[0]] = row[1]
 
-    # Average resolution time by status (for tickets that have moved at least once in history)
-    # We'll approximate resolution time as difference between first created_at and latest updated_at for that ticket
+    # By location
+    c.execute(
+        f"SELECT location, COUNT(*) as cnt FROM tickets {base_where} GROUP BY location",
+        filter_params
+    )
+    for row in c.fetchall():
+        aggregates["by_location"][row[0] or ""] = row[1]
+
+    # By weekday (0=Sunday..6=Saturday)
     c.execute(
         f"""
-        SELECT status, AVG(
-            CAST((JULIANDAY(updated_at) - JULIANDAY(created_at)) * 24.0 * 60.0 AS FLOAT)
-        ) as avg_minutes
+        SELECT STRFTIME('%%w', created_at) as wd, COUNT(*) as cnt
         FROM tickets
         {base_where}
-        GROUP BY status
+        GROUP BY STRFTIME('%%w', created_at)
+        ORDER BY CAST(STRFTIME('%%w', created_at) as INTEGER)
         """,
         filter_params
     )
     for row in c.fetchall():
-        status = row[0]
-        avg_minutes = row[1] or 0
-        # convert to days with 1 decimal
-        aggregates["avg_resolution_by_status"][status] = round(avg_minutes / 60.0 / 24.0, 1)
+        aggregates["by_weekday"][row[0]] = row[1]
 
     conn.close()
-    
+
     return jsonify({
         'tickets': tickets,
         'total': total,
@@ -613,7 +540,7 @@ def update_ticket_status(ticket_id):
     c = conn.cursor()
     
     # Get old status and ticket info
-    c.execute("SELECT status, name, email, subject, ticket_number FROM tickets WHERE id = ?", (ticket_id,))
+    c.execute("SELECT status FROM tickets WHERE id = ?", (ticket_id,))
     result = c.fetchone()
     if not result:
         conn.close()
@@ -626,15 +553,6 @@ def update_ticket_status(ticket_id):
         conn.close()
         return jsonify({'error': 'Closed tickets cannot be modified'}), 403
     
-    # Get ticket data for email
-    ticket_data = {
-        'name': result[1],
-        'email': result[2],
-        'subject': result[3],
-        'ticket_number': result[4],
-        'status': new_status
-    }
-    
     # Update ticket
     c.execute("UPDATE tickets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", 
               (new_status, ticket_id))
@@ -646,10 +564,7 @@ def update_ticket_status(ticket_id):
     conn.commit()
     conn.close()
     
-    # Send email notification to user about status change
-    send_status_update_email(ticket_data, old_status, new_status)
-    
-    return jsonify({'success': True, 'message': 'Status updated and user notified'})
+    return jsonify({'success': True, 'message': 'Status updated successfully'})
 
 @app.route('/admin/api/ticket/<int:ticket_id>/comment', methods=['POST'])
 @login_required
@@ -664,7 +579,7 @@ def add_comment(ticket_id):
     c = conn.cursor()
     
     # Check if ticket is closed - prevent comments on closed tickets
-    c.execute("SELECT status, name, email, subject, ticket_number FROM tickets WHERE id = ?", (ticket_id,))
+    c.execute("SELECT status FROM tickets WHERE id = ?", (ticket_id,))
     result = c.fetchone()
     if not result:
         conn.close()
@@ -674,15 +589,6 @@ def add_comment(ticket_id):
         conn.close()
         return jsonify({'error': 'Cannot add comments to closed tickets'}), 403
     
-    # Get ticket data for email
-    ticket_data = {
-        'name': result[1],
-        'email': result[2],
-        'subject': result[3],
-        'ticket_number': result[4],
-        'status': result[0]
-    }
-    
     # Insert comment
     c.execute("INSERT INTO comments (ticket_id, comment, created_by) VALUES (?, ?, ?)",
               (ticket_id, comment_text, session['username']))
@@ -691,12 +597,9 @@ def add_comment(ticket_id):
     comment_id = c.lastrowid
     conn.close()
     
-    # Send email notification to user about the comment
-    send_comment_email(ticket_data, comment_text, session['username'])
-    
     return jsonify({
         'success': True,
-        'message': 'Comment added and user notified',
+        'message': 'Comment added successfully',
         'comment': {
             'id': comment_id,
             'comment': comment_text,

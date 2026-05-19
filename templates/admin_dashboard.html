@@ -1,12 +1,13 @@
-<!-- templates/admin_dashboard.html - Admin Dashboard -->
+<!-- templates/admin_dashboard.html - Admin Dashboard with Tickets Above Graphs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - NTT Data Service Desk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>NTT Data Service Desk - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,105 +18,133 @@
         body {
             font-family: 'Inter', sans-serif;
             background: #f0f2f5;
-            color: #333;
+            color: #1a2a3a;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Header */
+        /* Header - NTT Data Style */
         .header {
-            background: white;
-            border-radius: 12px;
-            padding: 20px 25px;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
+            border-radius: 20px;
+            padding: 20px 28px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #004d40;
         }
 
         .header h1 {
-            font-size: 24px;
-            color: #333;
+            font-size: 20px;
+            color: white;
+            font-weight: 600;
         }
 
         .header .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
-            color: #666;
+            gap: 20px;
+            color: rgba(255,255,255,0.8);
             font-size: 14px;
         }
 
         .logout-btn {
-            background: #dc3545;
+            background: rgba(255,255,255,0.1);
             color: white;
-            padding: 8px 15px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 10px;
             text-decoration: none;
             font-size: 13px;
+            font-weight: 500;
             transition: all 0.3s;
         }
 
         .logout-btn:hover {
-            background: #c82333;
+            background: #dc3545;
         }
 
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 22px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
 
         .stat-info h3 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            color: #333;
+            color: #004d40;
         }
 
         .stat-info p {
-            color: #666;
-            font-size: 14px;
+            color: #6b7280;
+            font-size: 13px;
             margin-top: 5px;
+            font-weight: 500;
         }
 
         .stat-icon {
-            width: 50px;
-            height: 50px;
-            background: #667eea;
-            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6d9 100%);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 22px;
+            color: #004d40;
+            font-size: 24px;
         }
 
         /* Filters */
         .filters {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             align-items: end;
         }
@@ -124,124 +153,268 @@
             display: block;
             font-size: 12px;
             font-weight: 600;
-            color: #666;
+            color: #6b7280;
             margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .filter-group select,
         .filter-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #00695c;
+            box-shadow: 0 0 0 3px rgba(0,105,92,0.1);
         }
 
         .btn-reset {
-            background: #667eea;
+            background: #004d40;
             color: white;
-            padding: 10px 14px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
         }
 
         .btn-reset:hover {
-            background: #5a67d8;
+            background: #00695c;
         }
 
-        /* Tickets table */
+        /* Tickets Table - Now ABOVE Charts */
         .tickets-table-container {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow-x: auto;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2a3a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 5px;
+        }
+
+        .section-title i {
+            color: #00695c;
         }
 
         .tickets-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 800px;
         }
 
         .tickets-table th,
         .tickets-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 16px;
+            border-bottom: 1px solid #f0f2f5;
             text-align: left;
-        }
-
-        .tickets-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
             font-size: 13px;
         }
 
+        .tickets-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1a2a3a;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .tickets-table tr:hover {
-            background: #f8f9fa;
+            background: #f8fafc;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
 
-        .status-Open { background: #fff3cd; color: #856404; }
-        .status-In-Progress { background: #cce5ff; color: #004085; }
-        .status-Resolved { background: #d4edda; color: #155724; }
-        .status-Closed { background: #e2e3e5; color: #383d41; }
+        .status-Open { background: #fff3e0; color: #e65100; }
+        .status-In-Progress { background: #e3f2fd; color: #1565c0; }
+        .status-Resolved { background: #e8f5e9; color: #2e7d32; }
+        .status-Closed { background: #eceff1; color: #546e7a; }
 
-        .priority-Low { color: #28a745; font-weight: 600; }
-        .priority-Medium { color: #ffc107; font-weight: 600; }
-        .priority-High { color: #dc3545; font-weight: 600; }
+        .priority-Low { color: #2e7d32; font-weight: 600; }
+        .priority-Medium { color: #f57c00; font-weight: 600; }
+        .priority-High { color: #c62828; font-weight: 600; }
 
         .view-link {
-            color: #667eea;
+            color: #00695c;
             text-decoration: none;
             font-weight: 600;
+            font-size: 12px;
         }
 
         .view-link:hover {
             text-decoration: underline;
         }
 
-        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             padding: 20px;
         }
 
         .page-btn {
             padding: 8px 14px;
-            border: 1px solid #ddd;
+            border: 2px solid #e5e7eb;
             background: white;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
         .page-btn.active {
-            background: #667eea;
+            background: #004d40;
             color: white;
-            border-color: #667eea;
+            border-color: #004d40;
+        }
+
+        .page-btn:hover:not(.active) {
+            border-color: #00695c;
+            color: #00695c;
         }
 
         .loading, .no-data {
             text-align: center;
             padding: 40px;
-            color: #999;
+            color: #9ca3af;
+        }
+
+        /* Charts Section - Now BELOW Tickets */
+        .charts-card {
+            background: white;
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .charts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .charts-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2a3a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .charts-header h2 i {
+            color: #00695c;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #004d40 0%, #00695c 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,77,64,0.3);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-box {
+            border: 1px solid #f0f2f5;
+            border-radius: 16px;
+            padding: 18px;
+            background: #fafbfc;
+        }
+
+        .chart-box h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 280px;
+            max-height: 280px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 1000px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-canvas {
+                height: 250px;
+                max-height: 250px;
+            }
         }
 
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 15px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-canvas {
+                height: 220px;
+                max-height: 220px;
             }
         }
     </style>
@@ -249,13 +422,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            <div class="logo-area">
+                <img src="/static/image.png" alt="Logo" style="height: 42px; width: auto;">
+                <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            </div>
             <div class="user-info">
                 <span><i class="fas fa-user-shield"></i> {{ session.username }}</span>
                 <a href="{{ url_for('admin_logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
 
+        <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-info">
@@ -280,6 +457,7 @@
             </div>
         </div>
 
+        <!-- Filters -->
         <div class="filters">
             <div class="filter-group">
                 <label>Status</label>
@@ -308,21 +486,23 @@
             </div>
             <div class="filter-group">
                 <label>Search</label>
-                <input type="text" id="searchInput" placeholder="Ticket #, name, email, subject...">
+                <input type="text" id="searchInput" placeholder="Ticket #, name, email...">
             </div>
             <button class="btn-reset" id="resetFilters"><i class="fas fa-undo"></i> Reset</button>
         </div>
 
+        <!-- TICKETS TABLE SECTION - SUBJECT & TICKET TYPE REMOVED -->
+        <div class="section-title">
+            <i class="fas fa-ticket-alt"></i> Ticket List
+        </div>
         <div class="tickets-table-container">
             <table class="tickets-table">
                 <thead>
                     <tr>
                         <th>Ticket #</th>
                         <th>Submitted By</th>
-                        <th>Subject</th>
                         <th>Location</th>
                         <th>Category</th>
-                        <th>Ticket Type</th>
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Created</th>
@@ -330,10 +510,52 @@
                     </tr>
                 </thead>
                 <tbody id="ticketsTableBody">
-                    <tr><td colspan="10" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading tickets...</td></tr>
+                    <tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading tickets......</td></tr>
                 </tbody>
             </table>
             <div id="pagination" class="pagination"></div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="charts-card">
+            <div class="charts-header">
+                <h2><i class="fas fa-chart-pie"></i> Ticket Analytics</h2>
+                <div class="charts-actions">
+                    <a id="downloadCsvBtn" class="btn-download" href="#"><i class="fas fa-download"></i> Download CSV</a>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h3><i class="fas fa-chart-line"></i> Tickets Over Time</h3>
+                    <canvas id="chartOverTime" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3><i class="fas fa-chart-pie"></i> Tickets by Status</h3>
+                    <canvas id="chartByStatus" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3><i class="fas fa-tags"></i> Tickets by Category</h3>
+                    <canvas id="chartByCategory" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Tickets by Priority</h3>
+                    <canvas id="chartByPriority" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3><i class="fas fa-map-marker-alt"></i> Tickets by Location</h3>
+                    <canvas id="chartByLocation" class="chart-canvas"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3><i class="fas fa-calendar-alt"></i> Tickets by Weekday</h3>
+                    <canvas id="chartByWeekday" class="chart-canvas"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -346,6 +568,30 @@
             search: ''
         };
 
+        let charts = {
+            overTime: null,
+            byStatus: null,
+            byCategory: null,
+            byPriority: null,
+            byLocation: null,
+            byWeekday: null
+        };
+
+        function buildExportUrl() {
+            const params = new URLSearchParams({
+                status: currentFilters.status,
+                category: currentFilters.category,
+                priority: currentFilters.priority,
+                search: currentFilters.search
+            });
+            return `/admin/api/tickets/export?${params.toString()}`;
+        }
+
+        function updateDownloadLink() {
+            const a = document.getElementById('downloadCsvBtn');
+            a.href = buildExportUrl();
+        }
+
         function loadTickets() {
             const params = new URLSearchParams({
                 page: currentPage,
@@ -356,6 +602,8 @@
                 search: currentFilters.search
             });
 
+            updateDownloadLink();
+
             fetch(`/admin/api/tickets?${params}`)
                 .then(res => res.json())
                 .then(data => {
@@ -363,11 +611,12 @@
                     populateCategoryFilter(data.tickets);
                     renderTable(data.tickets);
                     renderPagination(data);
+                    renderCharts(data.aggregates);
                 })
                 .catch(err => {
                     console.error(err);
-                    document.getElementById('ticketsTableBody').innerHTML =
-                        '<tr><td colspan="10" class="no-data"><i class="fas fa-exclamation-triangle"></i> Error loading tickets</td></tr>';
+                    document.getElementById('ticketsTableBody').innerHTML = 
+                        '<tr><td colspan="8" class="no-data"><i class="fas fa-exclamation-triangle"></i> Error loading tickets</td></tr>';
                 });
         }
 
@@ -377,12 +626,171 @@
             document.getElementById('resolvedTickets').textContent = stats.resolved;
         }
 
+        function dictToLabelsAndValues(dictObj, maxItems = 8) {
+            const entries = Object.entries(dictObj || {});
+            entries.sort((a, b) => (b[1] || 0) - (a[1] || 0));
+            const sliced = entries.slice(0, maxItems);
+            return {
+                labels: sliced.map(e => e[0] === '' ? '(Blank)' : (e[0].length > 20 ? e[0].substring(0, 20) + '...' : e[0])),
+                values: sliced.map(e => e[1] || 0)
+            };
+        }
+
+        function renderCharts(aggregates) {
+            if (!window.Chart) return;
+
+            // Destroy existing charts
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                    charts[key] = null;
+                }
+            });
+
+            // 1) Over time line chart
+            const overTimeLabels = (aggregates.tickets_over_time || []).map(r => r.date);
+            const overTimeValues = (aggregates.tickets_over_time || []).map(r => r.count);
+            const ctx1 = document.getElementById('chartOverTime').getContext('2d');
+            charts.overTime = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: overTimeLabels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: overTimeValues,
+                        borderColor: '#004d40',
+                        backgroundColor: 'rgba(0,77,64,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#00695c',
+                        pointBorderColor: '#004d40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'top' } }
+                }
+            });
+
+            // 2) Status doughnut
+            const status = dictToLabelsAndValues(aggregates.by_status);
+            const ctx2 = document.getElementById('chartByStatus').getContext('2d');
+            charts.byStatus = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: status.labels,
+                    datasets: [{
+                        data: status.values,
+                        backgroundColor: ['#ff9800', '#2196f3', '#4caf50', '#9e9e9e', '#004d40'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } }
+                }
+            });
+
+            // 3) Category bar
+            const cat = dictToLabelsAndValues(aggregates.by_category);
+            const ctx3 = document.getElementById('chartByCategory').getContext('2d');
+            charts.byCategory = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: cat.labels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: cat.values,
+                        backgroundColor: '#00695c',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' } } }
+                }
+            });
+
+            // 4) Priority polarArea
+            const pr = dictToLabelsAndValues(aggregates.by_priority);
+            const ctx4 = document.getElementById('chartByPriority').getContext('2d');
+            charts.byPriority = new Chart(ctx4, {
+                type: 'polarArea',
+                data: {
+                    labels: pr.labels,
+                    datasets: [{
+                        data: pr.values,
+                        backgroundColor: ['#4caf50', '#ff9800', '#f44336', '#004d40'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } }
+                }
+            });
+
+            // 5) Location horizontal bar
+            const loc = dictToLabelsAndValues(aggregates.by_location);
+            const ctx5 = document.getElementById('chartByLocation').getContext('2d');
+            charts.byLocation = new Chart(ctx5, {
+                type: 'bar',
+                data: {
+                    labels: loc.labels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: loc.values,
+                        backgroundColor: '#80cbc4',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, grid: { color: '#e5e7eb' } } }
+                }
+            });
+
+            // 6) Weekday radar
+            const wdMap = aggregates.by_weekday || {};
+            const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const wdValues = ['0','1','2','3','4','5','6'].map(k => wdMap[k] || 0);
+            const ctx6 = document.getElementById('chartByWeekday').getContext('2d');
+            charts.byWeekday = new Chart(ctx6, {
+                type: 'radar',
+                data: {
+                    labels: weekdayNames,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: wdValues,
+                        borderColor: '#004d40',
+                        backgroundColor: 'rgba(0,77,64,0.2)',
+                        pointBackgroundColor: '#00695c',
+                        pointBorderColor: '#004d40'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
         function populateCategoryFilter(tickets) {
             const select = document.getElementById('categoryFilter');
             const existing = new Set(Array.from(select.options).map(o => o.value));
             const cats = new Set(tickets.map(t => t.category).filter(Boolean));
             cats.forEach(cat => {
-                if (!existing.has(cat)) {
+                if (!existing.has(cat) && cat) {
                     const opt = document.createElement('option');
                     opt.value = cat;
                     opt.textContent = cat;
@@ -394,18 +802,16 @@
         function renderTable(tickets) {
             const tbody = document.getElementById('ticketsTableBody');
             if (!tickets.length) {
-                tbody.innerHTML = '<tr><td colspan="10" class="no-data"><i class="fas fa-inbox"></i> No tickets found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data"><i class="fas fa-inbox"></i> No tickets found</td></tr>';
                 return;
             }
 
             tbody.innerHTML = tickets.map(ticket => `
                 <tr>
-                    <td><strong>${ticket.ticket_number}</strong></td>
-                    <td>${escapeHtml(ticket.name)}<br><small style="color:#666">${escapeHtml(ticket.email)}</small></td>
-                    <td>${escapeHtml(ticket.subject)}</td>
+                    <td><strong>${escapeHtml(ticket.ticket_number)}</strong></td>
+                    <td>${escapeHtml(ticket.name)}<br><small style="color:#6b7280">${escapeHtml(ticket.email)}</small></td>
                     <td>${escapeHtml(ticket.location || '')}</td>
                     <td>${escapeHtml(ticket.category || '')}</td>
-                    <td><small>${escapeHtml(ticket.subcategory || '')}</small></td>
                     <td class="priority-${ticket.priority}">${ticket.priority}</td>
                     <td><span class="status-badge status-${ticket.status.replace(' ', '-')}">${ticket.status}</span></td>
                     <td><small>${formatDate(ticket.created_at)}</small></td>
@@ -440,11 +846,13 @@
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
+        // Event Listeners
         document.getElementById('statusFilter').addEventListener('change', e => {
             currentFilters.status = e.target.value;
             currentPage = 1;
@@ -479,6 +887,7 @@
             loadTickets();
         });
 
+        // Initial load
         loadTickets();
     </script>
 </body>

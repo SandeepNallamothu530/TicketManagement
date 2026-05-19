@@ -1,11 +1,10 @@
-<!-- templates/admin_ticket_detail.html - Ticket Detail View with Closed Ticket Restrictions -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket #{{ ticket.ticket_number }} - Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Ticket #{{ ticket.ticket_number }} - NTT Data Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -17,7 +16,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background: #f0f2f5;
-            color: #333;
+            color: #1a2a3a;
         }
 
         .container {
@@ -26,70 +25,83 @@
             padding: 20px;
         }
 
-        /* Header */
         .header {
-            background: white;
-            border-radius: 12px;
-            padding: 20px 25px;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
+            border-radius: 20px;
+            padding: 20px 28px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #004d40;
         }
 
         .header h1 {
             font-size: 20px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: white;
+            font-weight: 600;
         }
 
         .ticket-number {
-            color: #667eea;
-            font-weight: 700;
-            margin-top: 5px;
-            font-size: 14px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
         }
 
         .back-btn {
-            background: #667eea;
+            background: rgba(255,255,255,0.1);
             color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
+            padding: 8px 18px;
+            border-radius: 10px;
             text-decoration: none;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
         }
 
         .back-btn:hover {
-            background: #5a67d8;
+            background: #004d40;
         }
 
-        /* Alert Banner */
         .alert-banner {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px 20px;
+            background: #fff3e0;
+            border-left: 4px solid #e65100;
+            padding: 16px 20px;
             margin-bottom: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .alert-banner i {
-            color: #856404;
+            color: #e65100;
         }
 
         .alert-banner span {
-            color: #856404;
+            color: #e65100;
             font-weight: 600;
         }
 
-        /* Two Column Layout */
         .detail-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -97,171 +109,167 @@
             margin-bottom: 25px;
         }
 
-        /* Cards */
         .card {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .card-header {
-            background: #667eea;
+            background: #004d40;
             color: white;
-            padding: 15px 20px;
+            padding: 16px 20px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 14px;
         }
 
         .card-body {
-            padding: 20px;
+            padding: 22px;
         }
 
         .info-row {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f2f5;
         }
 
         .info-label {
             width: 120px;
             font-weight: 600;
-            color: #666;
-            font-size: 13px;
+            color: #6b7280;
+            font-size: 12px;
         }
 
         .info-value {
             flex: 1;
-            color: #333;
-            font-size: 14px;
+            color: #1a2a3a;
+            font-size: 13px;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 6px 15px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
         }
 
-        .status-Open { background: #fff3cd; color: #856404; }
-        .status-In-Progress { background: #cce5ff; color: #004085; }
-        .status-Resolved { background: #d4edda; color: #155724; }
-        .status-Closed { background: #e2e3e5; color: #383d41; }
+        .status-Open { background: #fff3e0; color: #e65100; }
+        .status-In-Progress { background: #e3f2fd; color: #1565c0; }
+        .status-Resolved { background: #e8f5e9; color: #2e7d32; }
+        .status-Closed { background: #eceff1; color: #546e7a; }
 
-        .priority-Low { color: #28a745; font-weight: 600; }
-        .priority-Medium { color: #ffc107; font-weight: 600; }
-        .priority-High { color: #dc3545; font-weight: 600; }
+        .priority-Low { color: #2e7d32; font-weight: 600; }
+        .priority-Medium { color: #f57c00; font-weight: 600; }
+        .priority-High { color: #c62828; font-weight: 600; }
 
         .attachment-link {
-            display: inline-block;
-            padding: 8px 15px;
-            background: #f0f2f5;
-            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f0fdf9;
+            border-radius: 10px;
             text-decoration: none;
-            color: #667eea;
-            font-size: 13px;
+            color: #00695c;
+            font-size: 12px;
+            font-weight: 500;
         }
 
-        /* Status Update */
         .status-update {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-top: 15px;
         }
 
         .status-select {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
         }
 
-        .status-select:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
+        .status-select:focus {
+            outline: none;
+            border-color: #00695c;
         }
 
         .btn-update {
-            background: #667eea;
+            background: #004d40;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
         }
 
         .btn-update:hover:not(:disabled) {
-            background: #5a67d8;
+            background: #00695c;
         }
 
         .btn-update:disabled {
-            background: #adb5bd;
+            background: #9ca3af;
             cursor: not-allowed;
         }
 
-        /* Comments Section */
         .comments-section {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             margin-bottom: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .comment-form {
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 22px;
+            border-bottom: 1px solid #f0f2f5;
         }
 
         .comment-form textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
             resize: vertical;
             min-height: 80px;
         }
 
-        .comment-form textarea:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #00695c;
         }
 
         .comment-form button {
-            margin-top: 10px;
-            background: #667eea;
+            margin-top: 12px;
+            background: #004d40;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 10px 24px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
             font-weight: 600;
         }
 
         .comment-form button:hover:not(:disabled) {
-            background: #5a67d8;
-        }
-
-        .comment-form button:disabled {
-            background: #adb5bd;
-            cursor: not-allowed;
+            background: #00695c;
         }
 
         .comment-list {
-            padding: 20px;
+            padding: 22px;
         }
 
         .comment-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
             margin-bottom: 15px;
         }
 
@@ -270,23 +278,23 @@
             justify-content: space-between;
             margin-bottom: 10px;
             font-size: 12px;
-            color: #666;
+            color: #6b7280;
         }
 
         .comment-author {
             font-weight: 600;
-            color: #667eea;
+            color: #004d40;
         }
 
         .comment-text {
-            color: #333;
+            color: #1a2a3a;
             line-height: 1.5;
+            font-size: 13px;
         }
 
-        /* History */
         .history-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f5;
             font-size: 13px;
         }
 
@@ -301,22 +309,30 @@
             .full-width {
                 grid-column: span 1;
             }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div>
-                <h1><i class="fas fa-ticket-alt"></i> Ticket Details</h1>
-                <div class="ticket-number">{{ ticket.ticket_number }}</div>
+            <div class="logo-area">
+                <img src="/static/image.png" alt="Logo" style="height: 38px; width: auto;">
+                <div>
+                    <h1><i class="fas fa-ticket-alt"></i> Ticket Details</h1>
+                    <div class="ticket-number">{{ ticket.ticket_number }}</div>
+                </div>
             </div>
             <a href="{{ url_for('admin_dashboard') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
         </div>
 
         {% if ticket.status == 'Closed' %}
         <div class="alert-banner">
-            <i class="fas fa-lock"></i>
+            <i class="fas fa-lock fa-lg"></i>
             <span>This ticket is CLOSED. No further updates or comments can be added.</span>
         </div>
         {% endif %}
@@ -396,7 +412,7 @@
                 </div>
             </div>
 
-            <!-- Status Update (Full Width) -->
+            <!-- Status Update -->
             <div class="card full-width">
                 <div class="card-header"><i class="fas fa-sync-alt"></i> Update Status</div>
                 <div class="card-body">
@@ -415,7 +431,7 @@
             </div>
         </div>
 
-        <!-- Comments & History -->
+        <!-- Comments Section -->
         <div class="comments-section">
             <div class="card-header"><i class="fas fa-comments"></i> Add Comment</div>
             <div class="comment-form">
@@ -424,7 +440,7 @@
                     <i class="fas fa-paper-plane"></i> Add Comment
                 </button>
             </div>
-            <div class="card-header"><i class="fas fa-history"></i> Comments</div>
+            <div class="card-header" style="background: #f8fafc; color: #1a2a3a;"><i class="fas fa-history"></i> Comments</div>
             <div class="comment-list" id="commentsList">
                 {% for comment in comments %}
                 <div class="comment-item">
@@ -436,7 +452,7 @@
                 </div>
                 {% endfor %}
                 {% if not comments %}
-                <p style="color: #999; text-align: center;">No comments yet.</p>
+                <p style="color: #9ca3af; text-align: center;">No comments yet.</p>
                 {% endif %}
             </div>
         </div>
@@ -451,10 +467,10 @@
                     <span class="status-badge status-{{ entry.old_status.replace(' ', '-') if entry.old_status else 'Open' }}">{{ entry.old_status or 'None' }}</span> 
                     → 
                     <span class="status-badge status-{{ entry.new_status.replace(' ', '-') }}">{{ entry.new_status }}</span>
-                    <span style="float: right; color: #666; font-size: 12px;">{{ entry.changed_at }}</span>
+                    <span style="float: right; color: #6b7280; font-size: 11px;">{{ entry.changed_at }}</span>
                 </div>
                 {% else %}
-                <p style="color: #999;">No status changes recorded.</p>
+                <p style="color: #9ca3af;">No status changes recorded.</p>
                 {% endfor %}
             </div>
         </div>

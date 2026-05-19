@@ -1,11 +1,10 @@
-<!-- templates/index.html - User ticket submission page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NTT Data - IT Service Desk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -16,14 +15,28 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #004d40 0%, #1a2a3a 100%);
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="100" cy="100" r="80" fill="rgba(255,255,255,0.03)"/><circle cx="800" cy="200" r="120" fill="rgba(255,255,255,0.03)"/><circle cx="500" cy="800" r="150" fill="rgba(255,255,255,0.03)"/></svg>');
+            pointer-events: none;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         /* Header */
@@ -31,54 +44,78 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 20px;
+            animation: fadeInDown 0.6s ease;
         }
 
         .logo {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 10px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        .logo i {
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #004d40;
+        }
+
+        .logo-text {
             font-size: 32px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            font-weight: 400;
+            color: rgba(255,255,255,0.9);
         }
 
         .tagline {
-            color: rgba(255,255,255,0.9);
+            color: rgba(255,255,255,0.8);
             font-size: 14px;
+            letter-spacing: 1px;
         }
 
         /* Card */
         .card {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             overflow: hidden;
+            animation: fadeInUp 0.6s ease;
         }
 
         .card-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
             color: white;
-            padding: 25px 30px;
+            padding: 28px 32px;
         }
 
         .card-header h2 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .card-header p {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.7);
             font-size: 14px;
         }
 
         .card-body {
-            padding: 30px;
+            padding: 32px;
         }
 
         /* Form Styles */
@@ -96,33 +133,36 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-            font-size: 14px;
+            font-weight: 600;
+            color: #1a2a3a;
+            font-size: 13px;
+            letter-spacing: 0.3px;
         }
 
         .form-group label .required {
-            color: #e74c3c;
+            color: #dc3545;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             transition: all 0.3s;
+            background: #f9fafb;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            border-color: #00695c;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0,105,92,0.1);
         }
 
         .form-group textarea {
@@ -130,23 +170,31 @@
             min-height: 100px;
         }
 
-        .file-input {
-            position: relative;
-        }
-
         .file-input input[type="file"] {
             padding: 10px;
-            border: 2px dashed #e0e0e0;
-            background: #fafafa;
+            border: 2px dashed #e5e7eb;
+            background: #f9fafb;
             cursor: pointer;
+        }
+
+        .file-input input[type="file"]:hover {
+            border-color: #00695c;
+            background: #f0fdf9;
+        }
+
+        small {
+            color: #6b7280;
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
         }
 
         /* Buttons */
         .btn {
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -154,41 +202,32 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #004d40 0%, #00695c 100%);
             color: white;
             width: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+            box-shadow: 0 10px 25px -5px rgba(0,77,64,0.4);
         }
 
         .btn-primary:disabled {
             opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
         }
 
         /* Loading Animation */
         @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         @keyframes pulse {
-            0% {
-                box-shadow: 0 5px 15px rgba(102,126,234,0.4);
-            }
-            50% {
-                box-shadow: 0 5px 25px rgba(102,126,234,0.8);
-            }
-            100% {
-                box-shadow: 0 5px 15px rgba(102,126,234,0.4);
-            }
+            0% { box-shadow: 0 5px 15px rgba(0,105,92,0.4); }
+            50% { box-shadow: 0 5px 25px rgba(0,105,92,0.8); }
+            100% { box-shadow: 0 5px 15px rgba(0,105,92,0.4); }
         }
 
         .btn-primary.loading {
@@ -196,48 +235,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
             border-top: 2px solid white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
 
-        .btn-primary.loading i {
-            display: none;
-        }
-
-        .btn-primary.loading .spinner {
-            display: inline-block;
-        }
-
         /* Flash Messages */
         .flash-message {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: slideDown 0.3s ease;
+            gap: 12px;
+            animation: slideDown 0.4s ease;
         }
 
         .flash-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
         }
 
         .flash-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
         }
 
         @keyframes slideDown {
@@ -251,32 +282,77 @@
             }
         }
 
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Admin Link */
         .admin-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 24px;
         }
 
         .admin-link a {
-            color: white;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            font-size: 14px;
-            opacity: 0.8;
-            transition: opacity 0.3s;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .admin-link a:hover {
-            opacity: 1;
+            color: white;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
                 gap: 0;
             }
             .card-body {
-                padding: 20px;
+                padding: 24px;
             }
+            .card-header {
+                padding: 20px 24px;
+            }
+            .logo-text {
+                font-size: 24px;
+            }
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 22px;
+            }
+        }
+
+        /* Custom Select Styling */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
         }
     </style>
 </head>
@@ -284,11 +360,9 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <!-- <i class="fas fa-ticket-alt"></i> -->
-                <img src="{{ url_for('static', filename='image.png') }}" alt="NTT Data Logo" style="height: 40px; width: auto;" onerror="this.onerror=null;this.src='/static/logos/image.png';">
-                <!-- <span>NTT Data Service Desk</span> -->
+                <img src="/static/image.png" alt="Logo" style="height: 48px; width: auto; filter: brightness(0) invert(1);">
             </div>
-            <div class="tagline">Enterprise  Support · 24/7 Service</div>
+            <div class="tagline">Enterprise Support · 24/7 Global Service</div>
         </div>
 
         <div class="card">
@@ -301,7 +375,7 @@
                     {% if messages %}
                         {% for category, message in messages %}
                             <div class="flash-message flash-{{ category }}">
-                                <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %} fa-lg"></i>
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -377,7 +451,7 @@
                         <label>Attachment (Optional)</label>
                         <div class="file-input">
                             <input type="file" name="attachment" id="attachment" accept=".png,.jpg,.jpeg,.pdf,.txt,.doc,.docx,.xlsx,.zip">
-                            <small style="color: #666; display: block; margin-top: 5px;">Max 16MB. Allowed: PNG, JPG, PDF, TXT, DOC, XLSX, ZIP</small>
+                            <small>Max 16MB. Allowed: PNG, JPG, PDF, TXT, DOC, XLSX, ZIP</small>
                         </div>
                     </div>
 
@@ -393,7 +467,171 @@
     </div>
 
     <script>
-        // Client-side validation
+        // Ticket types mapping
+        const ticketTypes = {
+            "Hardware Issues": {
+                "Laptop/Desktop": [
+                    "Not turning on",
+                    "Slow performance",
+                    "Blue screen / crash",
+                    "Battery issues",
+                    "Keyboard/touchpad not working",
+                    "Display/screen issues",
+                    "Overheating"
+                ],
+                "Printer/Scanner": [
+                    "Printer not printing",
+                    "Paper jam",
+                    "Scanner not working",
+                    "Low toner/ink",
+                    "Network printer offline"
+                ],
+                "Peripherals": [
+                    "Mouse not working",
+                    "Keyboard issues",
+                    "Monitor display issues",
+                    "Docking station problems",
+                    "Headset/mic issues"
+                ]
+            },
+            "Software Issues": {
+                "Operating System": [
+                    "Windows update issues",
+                    "macOS problems",
+                    "Login issues",
+                    "Application crashes",
+                    "System freeze"
+                ],
+                "Microsoft Office": [
+                    "Outlook not syncing",
+                    "Excel freezing/crashing",
+                    "Word document issues",
+                    "PowerPoint problems",
+                    "Teams not working"
+                ],
+                "Business Applications": [
+                    "ERP access issues",
+                    "CRM problems",
+                    "Internal tools not working",
+                    "License activation",
+                    "Software installation request"
+                ]
+            },
+            "Network & Connectivity": {
+                "Wi-Fi Issues": [
+                    "Cannot connect to Wi-Fi",
+                    "Slow internet speed",
+                    "Intermittent connection",
+                    "Wi-Fi not showing"
+                ],
+                "VPN Access": [
+                    "Cannot connect to VPN",
+                    "VPN drops frequently",
+                    "Authentication failed",
+                    "Slow VPN speed"
+                ],
+                "Wired Network": [
+                    "No network connection",
+                    "Ethernet port not working",
+                    "Network drive access",
+                    "IP configuration issues"
+                ]
+            },
+            "Access & Security": {
+                "Account Access": [
+                    "Password reset",
+                    "Account locked",
+                    "New account request",
+                    "Permission issues",
+                    "MFA problems"
+                ],
+                "Security": [
+                    "Suspicious email",
+                    "Virus/malware alert",
+                    "Data access request",
+                    "Security training"
+                ]
+            },
+            "Facilities & Admin": {
+                "Office Equipment": [
+                    "Projector not working",
+                    "Conference room AV",
+                    "Telephone issues",
+                    "AC not cooling"
+                ],
+                "Office Supplies": [
+                    "Stationery request",
+                    "Pantry supplies",
+                    "Furniture request"
+                ],
+                "Access Cards": [
+                    "ID card not working",
+                    "New ID card request",
+                    "Access permission issue"
+                ]
+            },
+            "Other Requests": {
+                "General Inquiry": [
+                    "Policy question",
+                    "Process inquiry",
+                    "General information"
+                ],
+                "Escalation": [
+                    "Urgent issue",
+                    "Previous ticket follow-up",
+                    "Management escalation"
+                ]
+            }
+        };
+
+        // Populate category dropdown
+        function populateCategories() {
+            const categorySelect = document.getElementById('category');
+            const options = Array.from(categorySelect.options);
+            options.slice(1).forEach(opt => opt.remove());
+
+            Object.keys(ticketTypes).sort().forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        // Populate subcategory based on selected category
+        function populateSubCategories(selectedCategory) {
+            const subcategorySelect = document.getElementById('subcategory');
+            subcategorySelect.innerHTML = '';
+
+            if (!selectedCategory || !ticketTypes[selectedCategory]) {
+                subcategorySelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Select Category first';
+                subcategorySelect.appendChild(opt);
+                return;
+            }
+
+            subcategorySelect.disabled = false;
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select Sub-Category';
+            subcategorySelect.appendChild(placeholder);
+
+            Object.keys(ticketTypes[selectedCategory]).forEach(subcat => {
+                const option = document.createElement('option');
+                option.value = subcat;
+                option.textContent = subcat;
+                subcategorySelect.appendChild(option);
+            });
+        }
+
+        // Category change event
+        document.getElementById('category').addEventListener('change', (e) => {
+            populateSubCategories(e.target.value);
+        });
+
+        // Form validation with loading state
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -455,224 +693,16 @@
                 }
             }
 
-            // Add loading animation to submit button
+            // Add loading animation
             const submitBtn = document.querySelector('.btn-primary');
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
             submitBtn.innerHTML = '<span class="spinner"></span> Creating Ticket...';
         });
 
-        // Category -> Subcategory Mapping
-        const ticketTypes = {
-            "Admin & Facilities": {
-                "Housekeeping & Cleaning": [
-                    "Office cleaning (general / deep cleaning)",
-                    "Restroom maintenance",
-                    "Pantry cleaning",
-                    "Waste disposal / garbage pickup",
-                    "Pest control"
-                ],
-
-                "Electrical & Lighting": [
-                    "Power outage / fluctuation",
-                    "Lighting issues (fused bulbs, dim lights)",
-                    "UPS / inverter issues",
-                    "Generator support",
-                    "Electrical wiring complaints"
-                ],
-
-                "IT & Office Equipment": [
-                    "Printer / scanner issues",
-                    "Projector / meeting room AV setup",
-                    "Telephone / intercom issues",
-                    "Charging points / ports not working"
-                ],
-
-                "Furniture & Fixtures": [
-                    "Chair / desk repair",
-                    "Workstation setup",
-                    "Cabinet / drawer issues",
-                    "Door locks / hinges repair",
-                    "New furniture request"
-                ],
-
-                "HVAC (Air Conditioning & Ventilation)": [
-                    "AC not cooling / not working",
-                    "Temperature complaints",
-                    "Ventilation issues",
-                    "Air quality concerns"
-                ],
-
-                "Pantry & Cafeteria": [
-                    "Food quality complaints",
-                    "Pantry supplies refill (tea, coffee, water)",
-                    "Vending machine issues",
-                    "Catering requests for meetings/events"
-                ],
-
-                "Access & Security": [
-                    "ID card / access badge issues",
-                    "Entry/exit access problems",
-                    "Visitor management support",
-                    "Security personnel complaints",
-                    "CCTV issues"
-                ],
-
-                "Transport & Travel": [
-                    "Cab booking (pickup/drop)",
-                    "Shuttle service issues",
-                    "Parking requests / issues",
-                    "Vehicle maintenance (company vehicles)"
-                ],
-
-                "Maintenance & Repairs": [
-                    "Plumbing issues (leaks, blockages)",
-                    "Carpentry work",
-                    "Civil repairs (walls, flooring, ceiling)",
-                    "Glass breakage",
-                    "General office maintenance"
-                ],
-
-                "Meeting & Conference Room Support": [
-                    "Room booking issues",
-                    "AV setup requests",
-                    "Seating arrangement changes",
-                    "Event support"
-                ],
-
-                "Office Supplies / Stationery": [
-                    "Stationery request (pens, notebooks, etc.)",
-                    "Printing paper / forms",
-                    "Asset issuance (bags, badges, etc.)"
-                ],
-
-                "Health, Safety & Compliance": [
-                    "First aid request",
-                    "Fire safety issues / extinguisher refill",
-                    "Emergency evacuation concerns",
-                    "Workplace safety incidents"
-                ],
-
-                "Space Management / Moves": [
-                    "Seat allocation / relocation",
-                    "Floor layout changes",
-                    "Team movement requests"
-                ],
-
-                "Vendor & Service Requests": [
-                    "Vendor service complaints",
-                    "New vendor onboarding request",
-                    "AMC (Annual Maintenance Contract) support"
-                ],
-
-                "Other / General Requests": [
-                    "Miscellaneous requests",
-                    "Escalations",
-                    "Suggestions / feedback"
-                ]
-            },
-
-            "IT": {
-                "IT Support": [
-                    "Printer / scanner issues",
-                    "Laptop / desktop issue",
-                    "Email / Outlook issues",
-                    "Network / Wi-Fi issues",
-                    "VPN / Remote access",
-                    "Software installation / access",
-                    "Other IT request"
-                ]
-            }
-        };
-
-        // Populate category dropdown with all subcategories
-        function populateCategories() {
-            const categorySelect = document.getElementById('category');
-            
-            // Clear existing options except placeholder
-            const options = Array.from(categorySelect.options);
-            options.slice(1).forEach(opt => opt.remove());
-
-            // Get all unique subcategories from all main categories
-            const allSubcategories = {};
-            
-            Object.keys(ticketTypes).forEach(mainCategory => {
-                Object.keys(ticketTypes[mainCategory]).forEach(subCategory => {
-                    allSubcategories[subCategory] = {
-                        mainCategory: mainCategory,
-                        items: ticketTypes[mainCategory][subCategory]
-                    };
-                });
-            });
-
-            // Add all subcategories to the dropdown
-            Object.keys(allSubcategories).sort().forEach(subCategory => {
-                const option = document.createElement('option');
-                option.value = subCategory;
-                option.textContent = subCategory;
-                categorySelect.appendChild(option);
-            });
-        }
-
-        // Populate ticket types based on selected category (subcategory)
-        function populateTicketTypes(selectedSubcategory) {
-            const ticketSelect = document.getElementById('subcategory');
-
-            // Clear existing options
-            ticketSelect.innerHTML = '';
-
-            if (!selectedSubcategory) {
-                ticketSelect.disabled = true;
-                const opt = document.createElement('option');
-                opt.value = '';
-                opt.textContent = 'Select Category first';
-                ticketSelect.appendChild(opt);
-                return;
-            }
-
-            // Find which main category this subcategory belongs to
-            let subcategoryItems = null;
-            
-            Object.keys(ticketTypes).forEach(mainCategory => {
-                if (ticketTypes[mainCategory][selectedSubcategory]) {
-                    subcategoryItems = ticketTypes[mainCategory][selectedSubcategory];
-                }
-            });
-
-            if (!subcategoryItems) {
-                ticketSelect.disabled = true;
-                const opt = document.createElement('option');
-                opt.value = '';
-                opt.textContent = 'Select Category first';
-                ticketSelect.appendChild(opt);
-                return;
-            }
-
-            ticketSelect.disabled = false;
-
-            // Placeholder
-            const placeholder = document.createElement('option');
-            placeholder.value = '';
-            placeholder.textContent = 'Select Sub-Category';
-            ticketSelect.appendChild(placeholder);
-
-            // Add ticket types
-            subcategoryItems.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                ticketSelect.appendChild(option);
-            });
-        }
-
-        // Category change event
-        document.getElementById('category').addEventListener('change', (e) => {
-            populateTicketTypes(e.target.value);
-        });
-
-        // Load initial state
+        // Initialize
         populateCategories();
-        populateTicketTypes(document.getElementById('category').value);
+        populateSubCategories(document.getElementById('category').value);
     </script>
 </body>
 </html>
