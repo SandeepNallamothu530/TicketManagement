@@ -396,15 +396,43 @@
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label>Location <span class="required">*</span></label>
+                            <select name="location" id="location" required>
+                                <option value="">Select Location</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Hyderabad – NCC">Hyderabad – NCC</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Mumbai – Mahaveer">Mumbai – Mahaveer</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Adilabad">Adilabad</option>
+                                <option value="Vishakhapatnam">Vishakhapatnam</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Category <span class="required">*</span></label>
                             <select name="category" id="category" required>
                                 <option value="">Select Category</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label>Sub-Category <span class="required">*</span></label>
                             <select name="subcategory" id="subcategory" required>
                                 <option value="">Select Category first</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority <span class="required">*</span></label>
+                            <select name="priority" id="priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="Low">🟢 Low</option>
+                                <option value="Medium">🟡 Medium</option>
+                                <option value="High">🔴 High</option>
                             </select>
                         </div>
                     </div>
@@ -579,8 +607,10 @@
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
+            const location = document.getElementById('location').value;
             const category = document.getElementById('category').value;
             const subcategory = document.getElementById('subcategory').value;
+            const priority = document.getElementById('priority').value;
             const subject = document.getElementById('subject').value.trim();
             const description = document.getElementById('description').value.trim();
             
@@ -594,6 +624,11 @@
                 e.preventDefault();
                 return;
             }
+            if (!location) {
+                alert('Please select a location');
+                e.preventDefault();
+                return;
+            }
             if (!category) {
                 alert('Please select a category');
                 e.preventDefault();
@@ -601,6 +636,11 @@
             }
             if (!subcategory) {
                 alert('Please select a sub-category');
+                e.preventDefault();
+                return;
+            }
+            if (!priority) {
+                alert('Please select a priority');
                 e.preventDefault();
                 return;
             }
